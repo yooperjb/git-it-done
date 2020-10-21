@@ -2,6 +2,7 @@ var userFormEl = document.querySelector("#user-form");
 var nameInputEl = document.querySelector("#username");
 var repoContainerEl = document.querySelector("#repos-container");
 var repoSearchTerm = document.querySelector("#repo-search-term");
+var languageButtonsEl = document.querySelector("#language-buttons");
 
 // Fetch github user repos
 var getUserRepos = function(user) {
@@ -26,9 +27,6 @@ var getUserRepos = function(user) {
             alert("Unable to connect to GitHub");
         });
 };
-// asynchoronous behaviour - will print before inside
-// AJAX Asynchronous javascript and XML
-console.log("outside");
 
 // get and display user repo information
 var displayRepos = function(repos, searchTerm) {
@@ -46,7 +44,7 @@ var displayRepos = function(repos, searchTerm) {
     for (var i = 0; i < repos.length; i++) {
         // format repo name
         var repoName = repos[i].owner.login + "/" + repos[i].name;
-        console.log(repos[i].name);
+        //console.log(repos[i].name);
 
         // create a link for each repo, set class, and href
         var repoEl = document.createElement("a");
@@ -97,5 +95,35 @@ var formSubmitHandler = function(event) {
     }
 };
 
+// fetch featured repos of given language and write to page
+var getFeaturedRepos = function(language) {
+    var apiUrl = "http://api.github.com/search/repositories?q=" + language + "+is:featured&sort=help-wanted-issues";
+
+    fetch(apiUrl).then(function(response) {
+        if (response.ok) {
+            response.json().then(function(data) {
+               //console.log(data);
+               displayRepos(data.items, language);
+            });
+        }
+        else {
+            alert("Error: " + response.statusText);
+        }
+    });
+};
+
+var buttonClickHandler = function(event) {
+    var language = event.target.getAttribute("data-language");
+    console.log(language);
+    if (language) {
+        getFeaturedRepos(language);
+
+        // clear old content
+        repoContainerEl.textContent = "";
+    }
+};
+
 
 userFormEl.addEventListener("submit", formSubmitHandler);
+languageButtonsEl.addEventListener("click", buttonClickHandler);
+//getFeaturedRepos("javascript");
